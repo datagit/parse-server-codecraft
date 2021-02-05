@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://npmcdn.com/parse@2.19.0/dist/parse.min.js"></script>
+    <title>Document</title>
+    <script>
+        // the guide: https://docs.parseplatform.org/js/guide/#saving-objects
+        // http://parseplatform.org/parse-server/api/master/ParseServerOptions.html
+        Parse.initialize("myAppId", "YOUR_JAVASCRIPT_KEY");
+        //javascriptKey is required only if you have it on server.
+        Parse.serverURL = 'http://localhost:1337/parse'
+
+
+        Parse.enableEncryptedUser();
+        Parse.secret = 'my Secrey Key';
+
+
+        const GameScore = Parse.Object.extend("GameScore");
+        const gameScore = new GameScore();
+
+        function saveGameScore() {
+            gameScore.set("score", 1337);
+            gameScore.set("playerName", "Sean Plott");
+            gameScore.set("cheatMode", false);
+
+            gameScore.save()
+                .then((gameScore) => {
+                    // Execute any logic that should take place after the object is saved.
+                    alert('New object created with objectId: ' + gameScore.id);
+                }, (error) => {
+                    // Execute any logic that should take place if the save fails.
+                    // error is a Parse.Error with an error code and message.
+                    alert('Failed to create new object, with error code: ' + error.message);
+                });
+        }
+        async function singUp() {
+            const user = new Parse.User();
+            user.set("username", "user01");
+            user.set("password", "123456");
+            user.set("email", "datdm198x@gmail.com");
+
+            // other fields can be set just like with Parse.Object
+            user.set("phone", "415-392-0202");
+            try {
+                await user.signUp();
+                // Hooray! Let them use the app now.
+            } catch (error) {
+                // Show the error message somewhere and let the user try again.
+                alert("Error: " + error.code + " " + error.message);
+            }
+        }
+        async function singIn() {
+            const user = await Parse.User.logIn("user01", "123456");
+            // Do stuff after successful login.
+        }
+        function writePrivateNote() {
+            const Note = Parse.Object.extend("Note");
+            const privateNote = new Note();
+            privateNote.set("content", "This note is private!");
+            privateNote.setACL(new Parse.ACL(Parse.User.current()));
+            privateNote.save().then(note => {
+                console.log('writePrivateNote', note);
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <button onclick="saveGameScore();">saveGameScore</button> <br />
+    <button onclick="singUp();">singUp</button> <br />
+    <button onclick="singIn();">singIn</button> <br />
+    <button onclick="writePrivateNote();">writePrivateNote</button> <br />
+</body>
+
+</html>
