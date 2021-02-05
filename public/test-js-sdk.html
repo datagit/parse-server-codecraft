@@ -65,6 +65,43 @@
                 console.log('writePrivateNote', note);
             });
         }
+        function createRoles() {
+            var user = Parse.User.current();
+            //creating a new Parse.ACL list
+            var aclRole = new Parse.ACL();
+            //setting up permissions for public and current user
+            aclRole.setPublicReadAccess(true);
+            aclRole.setWriteAccess(user, true);
+
+            //creating a new Admin role and assigning the ACL role to it
+            var role = new Parse.Role('Admin', aclRole);
+            role.save()
+                .then(function () {
+                    // adding the currently logged in user to the admin role
+                    role.getUsers().add(Parse.User.current());
+                    role.save()
+                        .then(function () {
+                            console.log('Saved user role with ' + role.id);
+                            promise.resolve();
+                        });
+                });
+        }
+        function createPostWithRole() {
+
+            var BlogPost = Parse.Object.extend("BlogPost");
+            var post = new BlogPost();
+            post.set("cotent", "This is some content");
+            post.set("published", true);
+
+            var aclGroup = new Parse.ACL();
+            aclGroup.setPublicReadAccess(true);
+            aclGroup.setRoleWriteAccess('Admin', true);
+            post.setACL(aclGroup);
+
+            post.save().then(function () {
+                console.log("Saved blog post with ACL " + post.id);
+            });
+        }
     </script>
 </head>
 
@@ -73,6 +110,8 @@
     <button onclick="singUp();">singUp</button> <br />
     <button onclick="singIn();">singIn</button> <br />
     <button onclick="writePrivateNote();">writePrivateNote</button> <br />
+    <button onclick="createRoles();">createRoles admin</button> <br />
+    <button onclick="createPostWithRole();">createPostWithRole</button> <br />
 </body>
 
 </html>
